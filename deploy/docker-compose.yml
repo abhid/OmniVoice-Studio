@@ -91,5 +91,29 @@ services:
               capabilities: [gpu]
     restart: unless-stopped
 
+  # ── MCP server (GPU profile) — activate with: docker compose --profile gpu up
+  omnivoice-mcp:
+    image: ghcr.io/debpalash/omnivoice-studio:latest
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    container_name: omnivoice-mcp
+    profiles: ["gpu"]
+    ports:
+      - "0.0.0.0:8765:8765"
+    volumes:
+      - omnivoice-data:/app/omnivoice_data
+    environment:
+      - HF_HOME=/app/omnivoice_data/huggingface
+      - OMNIVOICE_DATA_DIR=/app/omnivoice_data
+      - PYTHONPATH=/app/backend
+      - PYTHONUNBUFFERED=1
+      - OMNIVOICE_API_URL=http://omnivoice-studio-gpu:3900
+    depends_on:
+      omnivoice-gpu:
+        condition: service_healthy
+    entrypoint: ["python3", "/app/backend/mcp_server.py", "--sse", "--port", "8765"]
+    restart: unless-stopped
+
 volumes:
   omnivoice-data:

@@ -43,17 +43,10 @@ def _ensure_mcp():
         sys.exit(1)
 
 
-def create_mcp_server():
+def create_mcp_server(host="0.0.0.0", port=8765):
     """Build and return the FastMCP server instance."""
     FastMCP = _ensure_mcp()
-    mcp = FastMCP(
-        "OmniVoice Studio",
-        version="0.3.0",
-        description=(
-            "AI-agent interface for OmniVoice Studio — voice cloning, "
-            "voice design, and video dubbing in 646 languages."
-        ),
-    )
+    mcp = FastMCP("OmniVoice Studio", host=host, port=port)
 
     # ── Helpers ─────────────────────────────────────────────────────────
 
@@ -200,11 +193,11 @@ def main():
     )
     args = parser.parse_args()
 
-    mcp = create_mcp_server()
+    mcp = create_mcp_server(host="0.0.0.0", port=args.port)
 
     if args.sse:
         logger.info("Starting MCP server on SSE transport, port %d", args.port)
-        mcp.run(transport="sse", port=args.port)
+        mcp.run(transport="sse")
     else:
         logger.info("Starting MCP server on stdio transport")
         mcp.run(transport="stdio")
