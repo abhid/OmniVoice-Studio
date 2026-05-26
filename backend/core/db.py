@@ -147,6 +147,10 @@ _ALLOWED_MIGRATIONS = {
     ("voice_profiles", "personality"),
     ("generation_history", "seed"),
     ("dub_history", "content_hash"),
+    ("voice_profiles", "default_speed"),
+    ("voice_profiles", "default_num_step"),
+    ("voice_profiles", "default_guidance_scale"),
+    ("voice_profiles", "default_effect_preset"),
 }
 
 
@@ -182,6 +186,12 @@ def _migrate(conn, current: int) -> int:
     if current < 4:
         _add_column_if_missing(conn, "voice_profiles", "personality", "TEXT DEFAULT ''")
         current = 4
+    if current < 5:
+        _add_column_if_missing(conn, "voice_profiles", "default_speed", "REAL DEFAULT NULL")
+        _add_column_if_missing(conn, "voice_profiles", "default_num_step", "INTEGER DEFAULT NULL")
+        _add_column_if_missing(conn, "voice_profiles", "default_guidance_scale", "REAL DEFAULT NULL")
+        _add_column_if_missing(conn, "voice_profiles", "default_effect_preset", "TEXT DEFAULT NULL")
+        current = 5
     return current
 
 

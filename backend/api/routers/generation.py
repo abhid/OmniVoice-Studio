@@ -155,6 +155,20 @@ async def generate_speech(
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
 
+    # Apply per-profile generation defaults when caller omits params
+    if profile_id:
+        with db_conn() as _pc:
+            _prof = _pc.execute("SELECT * FROM voice_profiles WHERE id=?", (profile_id,)).fetchone()
+        if _prof:
+            if speed == 1.0 and _prof["default_speed"] is not None:
+                speed = _prof["default_speed"]
+            if num_step == 16 and _prof["default_num_step"] is not None:
+                num_step = _prof["default_num_step"]
+            if guidance_scale == 2.0 and _prof["default_guidance_scale"] is not None:
+                guidance_scale = _prof["default_guidance_scale"]
+            if effect_preset == "broadcast" and _prof["default_effect_preset"] is not None:
+                effect_preset = _prof["default_effect_preset"]
+
     start_time = time.time()
     try:
         loop = asyncio.get_running_loop()

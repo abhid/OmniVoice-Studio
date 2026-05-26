@@ -21,6 +21,10 @@ class ProfileUpdate(BaseModel):
     instruct: Optional[str] = None
     language: Optional[str] = None
     personality: Optional[str] = None
+    default_speed: Optional[float] = None
+    default_num_step: Optional[int] = None
+    default_guidance_scale: Optional[float] = None
+    default_effect_preset: Optional[str] = None
 
 
 @router.get("/personalities")
@@ -86,7 +90,7 @@ def update_profile(profile_id: str, patch: ProfileUpdate):
     """Partial update — only fields set on the payload are changed."""
     fields = []
     params = []
-    for col in ("name", "ref_text", "instruct", "language", "personality"):
+    for col in ("name", "ref_text", "instruct", "language", "personality", "default_speed", "default_num_step", "default_guidance_scale", "default_effect_preset"):
         val = getattr(patch, col)
         if val is None:
             continue
