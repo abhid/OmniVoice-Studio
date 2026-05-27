@@ -43,17 +43,10 @@ def _ensure_mcp():
         sys.exit(1)
 
 
-def create_mcp_server():
+def create_mcp_server(host="0.0.0.0", port=8765):
     """Build and return the FastMCP server instance."""
     FastMCP = _ensure_mcp()
-    mcp = FastMCP(
-        "OmniVoice Studio",
-        version="0.3.0",
-        description=(
-            "AI-agent interface for OmniVoice Studio — voice cloning, "
-            "voice design, and video dubbing in 646 languages."
-        ),
-    )
+    mcp = FastMCP("OmniVoice Studio", host=host, port=port)
 
     # ── Helpers ─────────────────────────────────────────────────────────
 
@@ -82,8 +75,8 @@ def create_mcp_server():
         language: str = "Auto",
         profile_id: str | None = None,
         instruct: str | None = None,
-        speed: float = 1.0,
-        steps: int = 16,
+        speed: float | None = None,
+        steps: int | None = None,
     ) -> str:
         """Generate speech audio from text.
 
@@ -92,8 +85,8 @@ def create_mcp_server():
             language: Target language (ISO code or 'Auto'). 646 languages supported.
             profile_id: ID of a saved voice profile to clone. Omit for voice design mode.
             instruct: Style instruction (e.g. 'whisper', 'excited', 'narrator').
-            speed: Speech speed multiplier (0.5–2.0, default 1.0).
-            steps: Diffusion steps (8=fast/draft, 16=balanced, 32=quality).
+            speed: Speech speed multiplier (0.5-2.0). Omit to use the profile default.
+            steps: Diffusion steps (8=fast/draft, 16=balanced, 32=quality). Omit to use profile default.
 
         Returns:
             JSON with audio_id, generation_time, audio_duration, and
@@ -102,9 +95,11 @@ def create_mcp_server():
         form = {
             "text": text,
             "language": language,
-            "speed": str(speed),
-            "num_step": str(steps),
         }
+        if speed is not None:
+            form["speed"] = str(speed)
+        if steps is not None:
+            form["num_step"] = str(steps)
         if profile_id:
             form["profile_id"] = profile_id
         if instruct:
@@ -200,11 +195,11 @@ def main():
     )
     args = parser.parse_args()
 
-    mcp = create_mcp_server()
+    mcp = create_mcp_server(host="0.0.0.0", port=args.port)
 
     if args.sse:
         logger.info("Starting MCP server on SSE transport, port %d", args.port)
-        mcp.run(transport="sse", port=args.port)
+        mcp.run(transport="sse")
     else:
         logger.info("Starting MCP server on stdio transport")
         mcp.run(transport="stdio")

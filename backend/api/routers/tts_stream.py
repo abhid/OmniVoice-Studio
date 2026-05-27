@@ -140,6 +140,11 @@ async def ws_tts(websocket: WebSocket):
                                 kw["ref_text"] = row["ref_text"]
                             if row["instruct"] and not data.get("instruct"):
                                 kw["instruct"] = row["instruct"]
+                            # Apply per-profile generation defaults when caller omits them
+                            if "speed" not in data and row["default_speed"] is not None:
+                                kw["speed"] = row["default_speed"]
+                            if "effect_preset" not in data and row["default_effect_preset"] is not None:
+                                kw["effect_preset"] = row["default_effect_preset"]
                         else:
                             kw["voice"] = voice
                     except Exception:
