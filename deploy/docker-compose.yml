@@ -47,7 +47,7 @@ services:
       # interface. The backend default is 127.0.0.1 (see backend/main.py).
       - OMNIVOICE_BIND_HOST=0.0.0.0
       - OMNIVOICE_ALLOWED_ORIGINS=*
-      - OMNIVOICE_IDLE_TIMEOUT=0
+      - OMNIVOICE_IDLE_TIMEOUT=-1
       - OMNIVOICE_DISABLE_LOOPBACK_GUARD=1
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:3900/health"]
@@ -80,7 +80,7 @@ services:
       # LAN reachability off by default.
       - OMNIVOICE_BIND_HOST=0.0.0.0
       - OMNIVOICE_ALLOWED_ORIGINS=*
-      - OMNIVOICE_IDLE_TIMEOUT=0
+      - OMNIVOICE_IDLE_TIMEOUT=-1
       - OMNIVOICE_DISABLE_LOOPBACK_GUARD=1
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:3900/health"]
