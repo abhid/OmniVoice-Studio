@@ -17,7 +17,13 @@ from fastapi import HTTPException, Request
 # a custom client tuple, certain reverse-proxy headers) may pass strings
 # rather than parsed addresses. We accept the broader set without weakening
 # the guard: nothing here matches a non-loopback origin.
+import os
+
 _LOOPBACK_HOSTS = frozenset({"127.0.0.1", "::1", "localhost"})
+
+# Allow disabling the loopback guard via env var for LAN/remote deployments.
+# Set OMNIVOICE_DISABLE_LOOPBACK_GUARD=1 to permit all origins.
+_DISABLE_LOOPBACK_GUARD = os.environ.get("OMNIVOICE_DISABLE_LOOPBACK_GUARD", "0").strip() == "1"
 
 
 def require_loopback(request: Request) -> None:
@@ -35,7 +41,11 @@ def require_loopback(request: Request) -> None:
     Returns None on success (FastAPI dependency convention). Raises 403
     on rejection — the response body is `{"detail": "loopback origin required"}`
     so existing tests for `/system/set-env` keep passing without modification.
+
+    Set OMNIVOICE_DISABLE_LOOPBACK_GUARD=1 to bypass for LAN/remote deployments.
     """
+    if _DISABLE_LOOPBACK_GUARD:
+        return
     host = request.client.host if request.client else None
     if host not in _LOOPBACK_HOSTS:
         raise HTTPException(status_code=403, detail="loopback origin required")
